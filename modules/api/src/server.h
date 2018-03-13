@@ -25,7 +25,7 @@ class Server {
 
   static void _live_stream(const crow::request &req, crow::response &res);
 
-    crow::SimpleApp _app;
+  crow::SimpleApp _app;
 };
 
 }  // namespace api

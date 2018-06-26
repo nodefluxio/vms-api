@@ -182,7 +182,7 @@ IVS_URL_MEDIA_PARAM create_url_media_param(IVS_SERVICE_TYPE service_type,
   param.AudioDecType = AUDIO_DEC_G711U;
   param.BroadCastType = BROADCAST_UNICAST;
   param.PackProtocolType = PACK_PROTOCOL_ES;
-  param.ProtocolType = PROTOCOL_RTP_OVER_UDP;
+  param.ProtocolType = PROTOCOL_RTP_OVER_TCP;
   param.StreamType = STREAM_TYPE_MAIN;
   param.TransMode = MEDIA_TRANS;
   param.VideoDecType = VIDEO_DEC_H264;

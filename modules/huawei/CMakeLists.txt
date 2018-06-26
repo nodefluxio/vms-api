@@ -16,6 +16,7 @@ endif()
 file(GLOB hwivs_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 
 set(hwivs_INCLUDE_DIR
+    ${CMAKE_SOURCE_DIR}/external/spdlog/include
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../base
     $ENV{IVS_SDK_PATH}/inc

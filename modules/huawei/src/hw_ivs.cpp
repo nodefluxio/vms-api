@@ -4,8 +4,11 @@
 
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
+#include "spdlog/spdlog.h"
 
 namespace hwivs = vms::hwivs;
+
+auto hw_console = spdlog::stdout_color_mt("huawei");
 
 hwivs::HuaweiIVS::HuaweiIVS(const std::string &log_path) {
   IVS_SDK_SetLogPath(log_path.c_str());
@@ -14,11 +17,7 @@ hwivs::HuaweiIVS::HuaweiIVS(const std::string &log_path) {
 
 hwivs::HuaweiIVS::~HuaweiIVS() {
   if (_logged_in) {
-    try {
-      logout();
-    } catch (std::runtime_error) {
-      throw;
-    }
+    logout();
   }
 
   IVS_SDK_Cleanup();
@@ -27,6 +26,7 @@ hwivs::HuaweiIVS::~HuaweiIVS() {
 void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,
                              const std::string &username,
                              const std::string &password) {
+  hw_console->info("Logging in to Huawei VMS...");
   IVS_LOGIN_INFO login_info;
   strncpy(login_info.cUserName, username.c_str(), IVS_IP_LEN);
   strncpy(login_info.pPWD, password.c_str(), IVS_PWD_LEN);
@@ -49,11 +49,12 @@ void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,
 }
 
 void hwivs::HuaweiIVS::logout() {
+  hw_console->info("Logging out from Huawei VMS...");
   int return_code = IVS_SDK_Logout(_session_id);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error("Logout failed. Error code: " +
-                             std::to_string(return_code));
+    hw_console->error("Logout failed. Error code: " +
+                      std::to_string(return_code));
   }
 
   _logged_in = false;

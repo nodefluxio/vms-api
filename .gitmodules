@@ -1,3 +1,6 @@
 [submodule "external/spdlog"]
 	path = external/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "modules/api/external/cpp-subprocess"]
+	path = modules/api/external/cpp-subprocess
+	url = https://github.com/arun11299/cpp-subprocess.git

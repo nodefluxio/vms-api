@@ -58,10 +58,12 @@ void api::Server::_camera_list(const crow::request &req, crow::response &res) {
     console->error(err.what());
     response["code"] = "camera/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "camera/failed";
     response["message"] = "Failed to find camera.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");
@@ -93,10 +95,12 @@ void api::Server::_recording_list(const crow::request &req,
     console->error(err.what());
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "recording/failed";
     response["message"] = "Failed to find recording.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");
@@ -125,10 +129,12 @@ void api::Server::_playback(const crow::request &req, crow::response &res) {
     console->error(err.what());
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "recording/failed";
     response["message"] = "Failed to find recording.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");
@@ -154,10 +160,12 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
     console->error(err.what());
     response["code"] = "live-stream/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "live-stream/failed";
     response["message"] = "Failed to find live stream.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");

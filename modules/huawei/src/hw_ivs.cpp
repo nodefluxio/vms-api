@@ -1,6 +1,7 @@
 #include <cstring>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
@@ -182,10 +183,10 @@ IVS_URL_MEDIA_PARAM create_url_media_param(IVS_SERVICE_TYPE service_type,
   param.AudioDecType = AUDIO_DEC_G711U;
   param.BroadCastType = BROADCAST_UNICAST;
   param.PackProtocolType = PACK_PROTOCOL_ES;
-  param.ProtocolType = PROTOCOL_RTP_OVER_TCP;
+  param.ProtocolType = PROTOCOL_RTP_OVER_UDP;
   param.StreamType = STREAM_TYPE_MAIN;
   param.TransMode = MEDIA_TRANS;
-  param.VideoDecType = VIDEO_DEC_H264;
+  param.VideoDecType = VIDEO_DEC_H265;
   param.iClientType = 1;
   strncpy(param.cNVRCode, nvr_code.c_str(), nvr_code.size());
 
@@ -219,9 +220,38 @@ std::string hwivs::HuaweiIVS::playback(const std::string &camera_code,
   return std::string(rtsp_url.get());
 }
 
+std::vector<IVS_STREAM_INFO> get_stream_info(int session_id,
+                                             const std::string &camera_code) {
+  IVS_CAMERA_STREAM_CFG stream_config = {0};
+
+  int return_code = IVS_SDK_GetDeviceConfig(
+      session_id, camera_code.c_str(), CONFIG_CAMERA_STREAM_CFG, &stream_config,
+      sizeof(stream_config));
+
+  if (return_code != IVS_SUCCEED) {
+    throw std::runtime_error("Failed to get stream info. Error code: " +
+                             std::to_string(return_code));
+  }
+
+  std::vector<IVS_STREAM_INFO> stream_info;
+  for (unsigned int i = 0; i < stream_config.uiStreamInfoNum; i++) {
+    stream_info.push_back(stream_config.stStreamInfo[i]);
+  }
+
+  return stream_info;
+}
+
 std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
                                           const std::string &nvr_code) {
+  auto stream_info = get_stream_info(_session_id, camera_code);
   auto param = create_url_media_param(SERVICE_TYPE_REALVIDEO, nvr_code);
+
+  for (auto info : stream_info) {
+    if (info.uiStreamType == STREAM_TYPE_MAIN) {
+      param.VideoDecType = static_cast<IVS_VIDEO_DEC_TYPE>(info.uiEncodeType);
+      break;
+    }
+  }
 
   auto rtsp_url = std::make_unique<char[]>(1024);
   auto rtsp_url_ptr = rtsp_url.get();

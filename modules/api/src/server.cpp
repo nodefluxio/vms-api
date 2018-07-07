@@ -1,6 +1,5 @@
 #include "server.h"
 #include "spdlog/spdlog.h"
-#include "utils.h"
 
 namespace api = vms::api;
 
@@ -119,8 +118,6 @@ void api::Server::_playback(const crow::request &req, crow::response &res) {
     std::string rtsp_url =
         vms->playback(data["camera_code"].s(), data["nvr_code"].s(),
                       data["start_time"].s(), data["end_time"].s());
-
-    // utils::stream_to_file(rtsp_url, "static/out.mp4");
 
     response["ok"] = true;
     response["code"] = "recording/success";

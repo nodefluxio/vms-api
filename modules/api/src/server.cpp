@@ -1,10 +1,11 @@
 #include "server.h"
 #include "spdlog/spdlog.h"
+#include "utils.h"
 
 namespace api = vms::api;
 
 auto console = spdlog::stdout_color_mt("server");
-api::Session session;
+// api::Session session;
 
 api::Server::Server() {
   CROW_ROUTE(_app, "/camera-list").methods("POST"_method)(_camera_list);
@@ -18,7 +19,7 @@ api::Server::Server() {
 
 void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
 
-std::shared_ptr<vms::VMSInterface> api::Server::_login(
+std::shared_ptr<vms::hwivs::HuaweiIVS> api::Server::_login(
     const crow::json::rvalue body) {
   const std::string ip = body["ip"].s();
   const std::string username = body["username"].s();
@@ -26,7 +27,10 @@ std::shared_ptr<vms::VMSInterface> api::Server::_login(
   const std::string vendor = body["vendor"].s();
 
   try {
-    return session.login(ip, username, password, vendor);
+    auto vms = std::make_shared<vms::hwivs::HuaweiIVS>("./log");
+    vms->login(ip, 9900, username, password);
+    return vms;
+    // return session.login(ip, username, password, vendor);
   } catch (std::exception) {
     throw;
   }
@@ -54,10 +58,12 @@ void api::Server::_camera_list(const crow::request &req, crow::response &res) {
     console->error(err.what());
     response["code"] = "camera/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "camera/failed";
     response["message"] = "Failed to find camera.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");
@@ -89,10 +95,12 @@ void api::Server::_recording_list(const crow::request &req,
     console->error(err.what());
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "recording/failed";
     response["message"] = "Failed to find recording.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");
@@ -112,6 +120,8 @@ void api::Server::_playback(const crow::request &req, crow::response &res) {
         vms->playback(data["camera_code"].s(), data["nvr_code"].s(),
                       data["start_time"].s(), data["end_time"].s());
 
+    // utils::stream_to_file(rtsp_url, "static/out.mp4");
+
     response["ok"] = true;
     response["code"] = "recording/success";
     response["url"] = rtsp_url;
@@ -119,10 +129,12 @@ void api::Server::_playback(const crow::request &req, crow::response &res) {
     console->error(err.what());
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "recording/failed";
     response["message"] = "Failed to find recording.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");
@@ -148,10 +160,12 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
     console->error(err.what());
     response["code"] = "live-stream/invalid-argument";
     response["message"] = "Argument is invalid.";
+    res.code = 400;
   } catch (std::runtime_error err) {
     console->error(err.what());
     response["code"] = "live-stream/failed";
     response["message"] = "Failed to find live stream.";
+    res.code = 400;
   }
 
   res.add_header("Content-Type", "application/json");

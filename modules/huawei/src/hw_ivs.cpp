@@ -242,9 +242,14 @@ std::vector<IVS_STREAM_INFO> get_stream_info(int session_id,
 }
 
 std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
-                                          const std::string &nvr_code) {
+                                          const std::string &nvr_code,
+                                          const std::string &transport) {
   auto stream_info = get_stream_info(_session_id, camera_code);
   auto param = create_url_media_param(SERVICE_TYPE_REALVIDEO, nvr_code);
+
+  if (transport == "tcp") {
+    param.ProtocolType = PROTOCOL_RTP_OVER_TCP;
+  }
 
   for (auto info : stream_info) {
     if (info.uiStreamType == STREAM_TYPE_MAIN) {

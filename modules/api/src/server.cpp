@@ -147,8 +147,13 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
     auto data = crow::json::load(req.body);
     auto vms = _login(data);
 
-    std::string rtsp_url =
-        vms->live_stream(data["camera_code"].s(), data["nvr_code"].s());
+    std::string transport = "udp";
+    if (data.has("transport") && data["transport"].s() == "tcp") {
+      transport = "tcp";
+    }
+
+    std::string rtsp_url = vms->live_stream(data["camera_code"].s(),
+                                            data["nvr_code"].s(), transport);
 
     response["ok"] = true;
     response["code"] = "live-stream/success";

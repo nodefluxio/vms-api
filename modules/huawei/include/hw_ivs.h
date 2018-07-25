@@ -33,7 +33,8 @@ class HuaweiIVS : public VMSInterface {
                        const std::string &end_time) override;
 
   std::string live_stream(const std::string &camera_code,
-                          const std::string &nvr_code) override;
+                          const std::string &nvr_code,
+                          const std::string &transport) override;
 
  private:
   int _session_id;

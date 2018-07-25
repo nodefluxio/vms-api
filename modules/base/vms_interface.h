@@ -66,7 +66,8 @@ class VMSInterface {
                                const std::string &end_time) = 0;
 
   virtual std::string live_stream(const std::string &camera_code,
-                                  const std::string &nvr_code) = 0;
+                                  const std::string &nvr_code,
+                                  const std::string &transport) = 0;
 };
 
 }  // namespace vms

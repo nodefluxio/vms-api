@@ -3,9 +3,9 @@
 #include <stdexcept>
 #include <vector>
 
+#include "windows.h"
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
-#include "windows.h"
 #include "../../external/spdlog/spdlog.h"
 
 namespace hwivs = vms::hwivs;

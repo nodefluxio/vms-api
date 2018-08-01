@@ -1,5 +1,5 @@
 #include "server.h"
-#include "spdlog/spdlog.h"
+#include "../../external/spdlog/spdlog.h"
 
 namespace api = vms::api;
 

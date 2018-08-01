@@ -3,6 +3,9 @@
 
 #include "vms_interface.h"
 
+#include "windows.h"
+#include "IVS_SDK.h"
+
 namespace vms {
 namespace hwivs {
 class HuaweiIVS : public VMSInterface {
@@ -36,9 +39,16 @@ class HuaweiIVS : public VMSInterface {
                           const std::string &nvr_code,
                           const std::string &transport) override;
 
+  void sdk_playback(const std::string &camera_code,
+                    const std::string &start_time,
+                    const std::string &end_time);
+
  private:
   int _session_id;
   bool _logged_in;
+
+  IVS_ULONG _playback_handle = 0;
+  HWND _show_box;
 };
 }  // namespace hwivs
 }  // namespace vms

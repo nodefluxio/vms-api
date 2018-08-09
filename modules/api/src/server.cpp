@@ -1,5 +1,5 @@
 #include "server.h"
-#include "../../external/spdlog/spdlog.h"
+#include "spdlog/spdlog.h"
 
 namespace api = vms::api;
 
@@ -185,9 +185,9 @@ void api::Server::_sdk_playback(const crow::request &req, crow::response &res) {
     auto data = crow::json::load(req.body);
     auto vms = _login(data);
 
-    vms -> sdk_playback(data["camera_code"].s(),
-                          data["start_time"].s(),
-                          data["end_time"].s());
+    vms->sdk_playback(data["camera_code"].s(),
+                      data["start_time"].s(),
+                      data["end_time"].s());
 
     response["ok"] = true;
     response["code"] = "sdk_playback/success";

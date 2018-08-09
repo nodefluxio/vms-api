@@ -3,10 +3,13 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef _WIN32
 #include "windows.h"
+#endif
+
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
-#include "../../external/spdlog/spdlog.h"
+#include "spdlog/spdlog.h"
 
 namespace hwivs = vms::hwivs;
 

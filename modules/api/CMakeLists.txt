@@ -11,7 +11,7 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 # Detect dependencies
 # ----------------------------------------------------------------------------
 option(CMAKE_THREAD_LIBS_INIT "thread library" ON)
-option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" ON)
+option(CMAKE_USE_WIN32_THREADS_INIT "using WIN32 threads" _WIN32)
 
 find_package(Threads)
 if(NOT CMAKE_THREAD_LIBS_INIT)

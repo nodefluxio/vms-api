@@ -3,8 +3,15 @@
 
 #include "vms_interface.h"
 
+#ifdef _WIN32
 #include "windows.h"
+#endif
+
 #include "IVS_SDK.h"
+
+#ifndef _WIN32
+#define HWND void*
+#endif
 
 namespace vms {
 namespace hwivs {

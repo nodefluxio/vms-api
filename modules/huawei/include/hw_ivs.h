@@ -46,9 +46,11 @@ class HuaweiIVS : public VMSInterface {
                           const std::string &nvr_code,
                           const std::string &transport) override;
 
+  #ifdef _WIN32
   void sdk_playback(const std::string &camera_code,
                     const std::string &start_time,
                     const std::string &end_time);
+  #endif
 
  private:
   int _session_id;

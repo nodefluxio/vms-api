@@ -4,7 +4,11 @@ project(hwivs VERSION 0.1.0)
 # ----------------------------------------------------------------------------
 # Detect dependencies
 # ----------------------------------------------------------------------------
-find_library(IVS_SDK_LIBRARY NAMES IVS_SDK HINTS $ENV{IVS_SDK_PATH}/sdklib)
+find_library(IVS_SDK_LIBRARY
+    NAMES IVS_SDK
+    HINTS $ENV{IVS_SDK_PATH}/lib $ENV{IVS_SDK_PATH}/sdklib
+)
+
 if(NOT IVS_SDK_LIBRARY)
     message(SEND_ERROR "Cannot find IVS SDK. Try to point it in IVS_SDK_PATH environment variable.")
 endif()

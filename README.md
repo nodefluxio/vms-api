@@ -32,5 +32,5 @@ For more detail, please read the [API documentation](https://github.com/nodeflux
 mkdir build
 cd build
 cmake ..
-make
 ```
+Build `hwivs` project first, then build `vmsapi` project in Visual Studio

@@ -4,7 +4,7 @@ project(hwivs VERSION 0.1.0)
 # ----------------------------------------------------------------------------
 # Detect dependencies
 # ----------------------------------------------------------------------------
-find_library(IVS_SDK_LIBRARY NAMES IVS_SDK HINTS $ENV{IVS_SDK_PATH}/lib)
+find_library(IVS_SDK_LIBRARY NAMES IVS_SDK HINTS $ENV{IVS_SDK_PATH}/sdklib)
 if(NOT IVS_SDK_LIBRARY)
     message(SEND_ERROR "Cannot find IVS SDK. Try to point it in IVS_SDK_PATH environment variable.")
 endif()
@@ -30,7 +30,7 @@ target_link_libraries(hwivs
     ${IVS_SDK_LIBRARY}
 )
 
-target_compile_options(hwivs PRIVATE -Wall -Wextra -Wunused-parameter)
+target_compile_options(hwivs PRIVATE -Wall)
 set_property(TARGET hwivs PROPERTY CXX_STANDARD 14)
 
 set(hwivs_INCLUDE_DIR ${hwivs_INCLUDE_DIR} PARENT_SCOPE)

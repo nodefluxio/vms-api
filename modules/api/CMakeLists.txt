@@ -25,6 +25,7 @@ set(vmsapi_INCLUDE_DIR
   ${CMAKE_CURRENT_SOURCE_DIR}/external
   ${CMAKE_CURRENT_SOURCE_DIR}/../base
   ${CMAKE_CURRENT_SOURCE_DIR}/../huawei/include
+  $ENV{IVS_SDK_PATH}/inc
 )
 
 add_executable(vmsapi ${hwivs_SRC})

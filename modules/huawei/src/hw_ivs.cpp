@@ -12,8 +12,8 @@ namespace hwivs = vms::hwivs;
 auto hw_console = spdlog::stdout_color_mt("huawei");
 
 hwivs::HuaweiIVS::HuaweiIVS(const std::string &log_path) {
-  IVS_SDK_SetLogPath(log_path.c_str());
-  IVS_SDK_Init();
+  // IVS_SDK_SetLogPath(log_path.c_str());
+  // IVS_SDK_Init();
 }
 
 hwivs::HuaweiIVS::~HuaweiIVS() {
@@ -21,7 +21,7 @@ hwivs::HuaweiIVS::~HuaweiIVS() {
     logout();
   }
 
-  IVS_SDK_Cleanup();
+  // IVS_SDK_Cleanup();
 };
 
 void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,

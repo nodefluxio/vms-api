@@ -5,12 +5,7 @@
 
 #ifdef _WIN32
 #include "windows.h"
-#endif
-
 #include "IVS_SDK.h"
-
-#ifndef _WIN32
-#define HWND void*
 #endif
 
 namespace vms {
@@ -56,8 +51,10 @@ class HuaweiIVS : public VMSInterface {
   int _session_id;
   bool _logged_in;
 
+  #ifdef _WIN32
   IVS_ULONG _playback_handle = 0;
   HWND _show_box;
+  #endif
 };
 }  // namespace hwivs
 }  // namespace vms

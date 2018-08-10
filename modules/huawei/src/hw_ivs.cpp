@@ -277,6 +277,7 @@ std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
   return std::string(rtsp_url.get());
 }
 
+#ifdef _WIN32
 void hwivs::HuaweiIVS::sdk_playback(const std::string &camera_code,
                                       const std::string &start_time,
                                       const std::string &end_time) {
@@ -296,3 +297,4 @@ void hwivs::HuaweiIVS::sdk_playback(const std::string &camera_code,
                               std::to_string(return_code));
   }
 }
+#endif

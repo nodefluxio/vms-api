@@ -14,7 +14,7 @@ if(NOT CMAKE_THREAD_LIBS_INIT)
     message(SEND_ERROR "Cannot find a thread library.")
 endif()
 
-find_package(Boost)
+find_package(Boost COMPONENTS system)
 if(NOT Boost_FOUND)
     message(SEND_ERROR "Cannot find boost library.")
 endif()

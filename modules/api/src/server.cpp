@@ -15,7 +15,9 @@ api::Server::Server() {
 
   CROW_ROUTE(_app, "/live-stream").methods("POST"_method)(_live_stream);
 
+  #ifdef _WIN32
   CROW_ROUTE(_app, "/sdk_playback").methods("POST"_method)(_sdk_playback);
+  #endif
 }
 
 void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
@@ -177,6 +179,7 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
   res.end();
 }
 
+#ifdef _WIN32
 void api::Server::_sdk_playback(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = false;
@@ -207,3 +210,4 @@ void api::Server::_sdk_playback(const crow::request &req, crow::response &res) {
   res.write(crow::json::dump(response));
   res.end();
 }
+#endif

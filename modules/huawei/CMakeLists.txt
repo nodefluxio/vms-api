@@ -34,7 +34,7 @@ target_link_libraries(hwivs
     ${IVS_SDK_LIBRARY}
 )
 
-target_compile_options(hwivs PRIVATE -Wall)
+target_compile_options(hwivs PRIVATE -Wall -Wextra -Wunused-parameter)
 set_property(TARGET hwivs PROPERTY CXX_STANDARD 14)
 
 set(hwivs_INCLUDE_DIR ${hwivs_INCLUDE_DIR} PARENT_SCOPE)

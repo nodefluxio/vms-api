@@ -14,6 +14,8 @@ api::Server::Server() {
   CROW_ROUTE(_app, "/playback").methods("POST"_method)(_playback);
 
   CROW_ROUTE(_app, "/live-stream").methods("POST"_method)(_live_stream);
+
+  CROW_ROUTE(_app, "/health-check").methods("GET"_method)(_health_check);
 }
 
 void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
@@ -169,6 +171,15 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
     response["message"] = "Failed to find live stream.";
     res.code = 400;
   }
+
+  res.add_header("Content-Type", "application/json");
+  res.write(crow::json::dump(response));
+  res.end();
+}
+
+void api::Server::_health_check(const crow::request &req, crow::response &res) {
+  crow::json::wvalue response;
+  response["ok"] = true;
 
   res.add_header("Content-Type", "application/json");
   res.write(crow::json::dump(response));

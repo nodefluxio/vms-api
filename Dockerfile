@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y build-essential cmake libboost-all-dev && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y build-essential cmake curl libboost-all-dev && rm -rf /var/lib/apt/lists/*
 
 ADD . /app
 

@@ -27,6 +27,10 @@ class Server {
   static void _live_stream(const crow::request &req, crow::response &res);
 
   static void _health_check(const crow::request &req, crow::response &res);
+  
+  #ifdef _WIN32
+  static void _sdk_playback(const crow::request &req, crow::response &res);
+  #endif
 
   crow::SimpleApp _app;
 };

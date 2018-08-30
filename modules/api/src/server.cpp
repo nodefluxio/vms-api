@@ -14,8 +14,12 @@ api::Server::Server() {
   CROW_ROUTE(_app, "/playback").methods("POST"_method)(_playback);
 
   CROW_ROUTE(_app, "/live-stream").methods("POST"_method)(_live_stream);
-
+  
   CROW_ROUTE(_app, "/health-check").methods("GET"_method)(_health_check);
+
+  #ifdef _WIN32
+  CROW_ROUTE(_app, "/sdk_playback").methods("POST"_method)(_sdk_playback);
+  #endif
 }
 
 void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
@@ -176,6 +180,36 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
   res.write(crow::json::dump(response));
   res.end();
 }
+
+#ifdef _WIN32
+void api::Server::_sdk_playback(const crow::request &req, crow::response &res) {
+  crow::json::wvalue response;
+  response["ok"] = false;
+
+  try {
+    auto data = crow::json::load(req.body);
+    auto vms = _login(data);
+
+    vms->sdk_playback(data["camera_code"].s(),
+                      data["start_time"].s(),
+                      data["end_time"].s());
+
+    response["ok"] = true;
+    response["code"] = "sdk_playback/success";
+  } catch (std::invalid_argument err) {
+    console->error(err.what());
+    response["code"] = "sdk_playback/invalid-argument";
+    response["message"] = "Argument is invalid.";
+    res.code = 400;
+  } catch (std::runtime_error err) {
+    console->error(err.what());
+    response["code"] = "sdk_playback/failed";
+    response["message"] = "Failed to find sdk playback.";
+    res.code = 400;
+  }
+}
+ 
+#endif
 
 void api::Server::_health_check(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;

@@ -3,6 +3,10 @@
 #include <stdexcept>
 #include <vector>
 
+#ifdef _WIN32
+#include "windows.h"
+#endif
+
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
 #include "spdlog/spdlog.h"
@@ -272,3 +276,25 @@ std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
 
   return std::string(rtsp_url.get());
 }
+
+#ifdef _WIN32
+void hwivs::HuaweiIVS::sdk_playback(const std::string &camera_code,
+                                      const std::string &start_time,
+                                      const std::string &end_time) {
+  // Playback parameter
+  IVS_PLAYBACK_PARAM param = {0};
+
+  strncpy_s(param.stTimeSpan.cStart, start_time.c_str(), IVS_TIME_LEN);
+  strncpy_s(param.stTimeSpan.cEnd, end_time.c_str(), IVS_TIME_LEN);
+  param.uiProtocolType = 2;  // 1:UDP, 2:TCP
+  param.fSpeed = 1.0;
+
+  int return_code = IVS_SDK_StartPlatformPlayBack(_session_id, camera_code.c_str(),
+                                                  &param, _show_box, &_playback_handle);
+
+  if (return_code != IVS_SUCCEED) {
+    throw std::runtime_error("Failed to start platform playback. Error code: " +
+                              std::to_string(return_code));
+  }
+}
+#endif

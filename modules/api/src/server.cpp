@@ -14,6 +14,8 @@ api::Server::Server() {
   CROW_ROUTE(_app, "/playback").methods("POST"_method)(_playback);
 
   CROW_ROUTE(_app, "/live-stream").methods("POST"_method)(_live_stream);
+  
+  CROW_ROUTE(_app, "/health-check").methods("GET"_method)(_health_check);
 
   #ifdef _WIN32
   CROW_ROUTE(_app, "/sdk_playback").methods("POST"_method)(_sdk_playback);
@@ -205,9 +207,15 @@ void api::Server::_sdk_playback(const crow::request &req, crow::response &res) {
     response["message"] = "Failed to find sdk playback.";
     res.code = 400;
   }
+}
+ 
+#endif
+
+void api::Server::_health_check(const crow::request &req, crow::response &res) {
+  crow::json::wvalue response;
+  response["ok"] = true;
 
   res.add_header("Content-Type", "application/json");
   res.write(crow::json::dump(response));
   res.end();
 }
-#endif

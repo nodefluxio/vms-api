@@ -2,6 +2,7 @@
 #define SERVER_H
 
 #include "crow/crow_all.h"
+#include "flussonic.h"
 #include "hw_ivs.h"
 #include "session.h"
 
@@ -15,7 +16,7 @@ class Server {
   void run(int port = 8000);
 
  private:
-  static std::shared_ptr<vms::hwivs::HuaweiIVS> _login(
+  static std::shared_ptr<vms::flussonic::Flussonic> _login(
       const crow::json::rvalue body);
 
   static void _camera_list(const crow::request &req, crow::response &res);

@@ -33,5 +33,7 @@ endif()
 # Add modules
 # ----------------------------------------------------------------------------
 
-add_subdirectory(modules/huawei)
+
+# add_subdirectory(modules/huawei)
+add_subdirectory(modules/flussonic)
 add_subdirectory(modules/api)

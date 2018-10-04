@@ -220,6 +220,13 @@ std::string hwivs::HuaweiIVS::playback(const std::string &camera_code,
   return std::string(rtsp_url.get());
 }
 
+std::string hwivs::HuaweiIVS::download(const std::string &camera_code,
+                                       const std::string &nvr_code,
+                                       const std::string &start_time,
+                                       const std::string &end_time) {
+  return "";
+}
+
 std::vector<IVS_STREAM_INFO> get_stream_info(int session_id,
                                              const std::string &camera_code) {
   IVS_CAMERA_STREAM_CFG stream_config = {0};

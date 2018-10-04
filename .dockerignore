@@ -1,4 +1,5 @@
 .vscode/
 build/
 log/
+eSDK_IVS_API/
 *.mp4

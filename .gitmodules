@@ -1,3 +1,6 @@
 [submodule "external/spdlog"]
 	path = external/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "modules/flussonic/external/cpr"]
+	path = modules/flussonic/external/cpr
+	url = https://github.com/whoshuu/cpr.git

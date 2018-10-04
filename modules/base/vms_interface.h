@@ -65,6 +65,11 @@ class VMSInterface {
                                const std::string &start_time,
                                const std::string &end_time) = 0;
 
+  virtual std::string download(const std::string &camera_code,
+                               const std::string &nvr_code,
+                               const std::string &start_time,
+                               const std::string &end_time) = 0;
+
   virtual std::string live_stream(const std::string &camera_code,
                                   const std::string &nvr_code,
                                   const std::string &transport) = 0;

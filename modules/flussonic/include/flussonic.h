@@ -1,15 +1,14 @@
-#ifndef HW_IVS_H
-#define HW_IVS_H
+#ifndef FLUSSONIC_H
+#define FLUSSONIC_H
 
+#include <ctime>
 #include "vms_interface.h"
 
 namespace vms {
-namespace hwivs {
-class HuaweiIVS : public VMSInterface {
+namespace flussonic {
+class Flussonic : public VMSInterface {
  public:
-  HuaweiIVS(const std::string &log_path);
-
-  ~HuaweiIVS();
+  Flussonic(const std::string &log_path);
 
   void login(const std::string &ip, unsigned int port,
              const std::string &username, const std::string &password) override;
@@ -41,11 +40,24 @@ class HuaweiIVS : public VMSInterface {
                           const std::string &nvr_code,
                           const std::string &transport) override;
 
+  std::string create_url(const std::string &_ip, const std::string &camera_code,
+                         const std::string &start_time,
+                         const std::string &end_time);
+
+  std::time_t to_unix_timestamp(const std::string &timestamp);
+
+  bool status_stream(const std::string &_ip, const unsigned int &_port,
+                     const std::string &camera_code);
+
+  bool to_bool(std::string str);
+
  private:
   int _session_id;
   bool _logged_in;
+  std::string _ip, _id, _pass;
+  unsigned int _port;
 };
-}  // namespace hwivs
+}  // namespace flussonic
 }  // namespace vms
 
 #endif

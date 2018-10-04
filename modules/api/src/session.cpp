@@ -1,7 +1,6 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "hw_ivs.h"
 #include "session.h"
 
 namespace api = vms::api;
@@ -38,7 +37,7 @@ std::shared_ptr<vms::VMSInterface> api::Session::_create_vendor_vms(
   std::shared_ptr<vms::VMSInterface> vms{nullptr};
 
   if (vendor == "huawei") {
-    vms = std::make_shared<vms::hwivs::HuaweiIVS>("./log");
+    // vms = std::make_shared<vms::hwivs::HuaweiIVS>("./log");
   }
 
   return vms;

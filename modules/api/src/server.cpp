@@ -20,7 +20,7 @@ api::Server::Server() {
 
 void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
 
-std::shared_ptr<vms::hwivs::HuaweiIVS> api::Server::_login(
+std::shared_ptr<vms::flussonic::Flussonic> api::Server::_login(
     const crow::json::rvalue body) {
   const std::string ip = body["ip"].s();
   const std::string username = body["username"].s();
@@ -28,8 +28,8 @@ std::shared_ptr<vms::hwivs::HuaweiIVS> api::Server::_login(
   const std::string vendor = body["vendor"].s();
 
   try {
-    auto vms = std::make_shared<vms::hwivs::HuaweiIVS>("./log");
-    vms->login(ip, 9900, username, password);
+    auto vms = std::make_shared<vms::flussonic::Flussonic>("./log");
+    vms->login(ip, 8090, username, password);
     return vms;
     // return session.login(ip, username, password, vendor);
   } catch (std::exception) {

@@ -39,6 +39,7 @@ class HuaweiIVS : public VMSInterface {
  private:
   int _session_id;
   bool _logged_in;
+  static bool _initialized;
 };
 }  // namespace hwivs
 }  // namespace vms

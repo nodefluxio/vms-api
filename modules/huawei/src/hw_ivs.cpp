@@ -11,9 +11,15 @@ namespace hwivs = vms::hwivs;
 
 auto hw_console = spdlog::stdout_color_mt("huawei");
 
+bool hwivs::HuaweiIVS::_initialized = false;
+
 hwivs::HuaweiIVS::HuaweiIVS(const std::string &log_path) {
-  // IVS_SDK_SetLogPath(log_path.c_str());
-  // IVS_SDK_Init();
+  if (!hwivs::HuaweiIVS::_initialized) {
+    IVS_SDK_SetLogPath(log_path.c_str());
+    IVS_SDK_Init();
+
+    hwivs::HuaweiIVS::_initialized = true;
+  }
 }
 
 hwivs::HuaweiIVS::~HuaweiIVS() {
@@ -21,7 +27,11 @@ hwivs::HuaweiIVS::~HuaweiIVS() {
     logout();
   }
 
-  // IVS_SDK_Cleanup();
+  if (hwivs::HuaweiIVS::_initialized) {
+    IVS_SDK_Cleanup();
+
+    hwivs::HuaweiIVS::_initialized = false;
+  }
 };
 
 void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,
@@ -43,7 +53,7 @@ void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,
 
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error("Login failed. Error code: " +
-                             std::to_string(return_code));
+        std::to_string(return_code));
   }
 
   _logged_in = true;
@@ -55,7 +65,7 @@ void hwivs::HuaweiIVS::logout() {
 
   if (return_code != IVS_SUCCEED) {
     hw_console->error("Logout failed. Error code: " +
-                      std::to_string(return_code));
+        std::to_string(return_code));
   }
 
   _logged_in = false;
@@ -66,17 +76,17 @@ int hwivs::HuaweiIVS::session_id() { return _session_id; }
 std::vector<vms::Device> hwivs::HuaweiIVS::nvr_list(unsigned int max) {
   IVS_INDEX_RANGE range = {1, max};
   unsigned int buffer_size = sizeof(IVS_DEVICE_BRIEF_INFO_LIST) +
-                             (max - 1) * sizeof(IVS_DEVICE_BRIEF_INFO);
+      (max - 1) * sizeof(IVS_DEVICE_BRIEF_INFO);
 
   auto nvr_list = std::make_unique<char[]>(buffer_size);
-  auto nvr_list_ptr = (IVS_DEVICE_BRIEF_INFO_LIST *)nvr_list.get();
+  auto nvr_list_ptr = (IVS_DEVICE_BRIEF_INFO_LIST *) nvr_list.get();
 
   int return_code =
       IVS_SDK_GetNVRList(_session_id, "", 1, &range, nvr_list_ptr, buffer_size);
 
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error("Failed to list nvr. Error code: " +
-                             std::to_string(return_code));
+        std::to_string(return_code));
   }
 
   std::vector<vms::Device> nvrs;
@@ -96,10 +106,10 @@ std::vector<vms::Device> hwivs::HuaweiIVS::nvr_list(unsigned int max) {
 std::vector<vms::Device> hwivs::HuaweiIVS::camera_list(unsigned int max) {
   IVS_INDEX_RANGE index_range = {1, max};
   unsigned int buffer_size = sizeof(IVS_CAMERA_BRIEF_INFO_LIST) +
-                             (max - 1) * sizeof(IVS_CAMERA_BRIEF_INFO);
+      (max - 1) * sizeof(IVS_CAMERA_BRIEF_INFO);
 
   auto camera_list = std::make_unique<char[]>(buffer_size);
-  auto camera_list_ptr = (IVS_CAMERA_BRIEF_INFO_LIST *)camera_list.get();
+  auto camera_list_ptr = (IVS_CAMERA_BRIEF_INFO_LIST *) camera_list.get();
 
   int return_code =
       IVS_SDK_GetDeviceList(_session_id, DEVICE_TYPE_CAMERA, &index_range,
@@ -107,7 +117,7 @@ std::vector<vms::Device> hwivs::HuaweiIVS::camera_list(unsigned int max) {
 
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error("Failed to list camera. Error code: " +
-                             std::to_string(return_code));
+        std::to_string(return_code));
   }
 
   std::vector<vms::Device> cameras;
@@ -126,8 +136,8 @@ std::vector<vms::Device> hwivs::HuaweiIVS::camera_list(unsigned int max) {
 
 unsigned int _get_num_of_records(IVS_RECORD_INFO_LIST *recording_list_ptr) {
   unsigned int num_of_records = (recording_list_ptr->stIndexRange.uiToIndex -
-                                 recording_list_ptr->stIndexRange.uiToIndex) +
-                                1;
+      recording_list_ptr->stIndexRange.uiToIndex) +
+      1;
 
   if (num_of_records > recording_list_ptr->uiTotal) {
     num_of_records = recording_list_ptr->uiTotal;
@@ -148,7 +158,7 @@ std::vector<vms::Record> hwivs::HuaweiIVS::recording_list(
   unsigned int buffer_size =
       sizeof(IVS_RECORD_INFO_LIST) + (max - 1) * sizeof(IVS_RECORD_INFO);
   auto recording_list = std::make_unique<char[]>(buffer_size);
-  auto recording_list_ptr = (IVS_RECORD_INFO_LIST *)recording_list.get();
+  auto recording_list_ptr = (IVS_RECORD_INFO_LIST *) recording_list.get();
 
   int return_code =
       IVS_SDK_GetRecordList(_session_id, camera_code.c_str(), 0, &time_span,
@@ -156,7 +166,7 @@ std::vector<vms::Record> hwivs::HuaweiIVS::recording_list(
 
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error("Failed to list recording. Error code: " +
-                             std::to_string(return_code));
+        std::to_string(return_code));
   }
 
   unsigned int num_of_records = _get_num_of_records(recording_list_ptr);
@@ -214,7 +224,7 @@ std::string hwivs::HuaweiIVS::playback(const std::string &camera_code,
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error(
         "Failed to get RTSP URL for live streaming . Error code: " +
-        std::to_string(return_code));
+            std::to_string(return_code));
   }
 
   return std::string(rtsp_url.get());
@@ -230,7 +240,7 @@ std::vector<IVS_STREAM_INFO> get_stream_info(int session_id,
 
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error("Failed to get stream info. Error code: " +
-                             std::to_string(return_code));
+        std::to_string(return_code));
   }
 
   std::vector<IVS_STREAM_INFO> stream_info;
@@ -267,7 +277,7 @@ std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
   if (return_code != IVS_SUCCEED) {
     throw std::runtime_error(
         "Failed to get RTSP URL for live streaming . Error code: " +
-        std::to_string(return_code));
+            std::to_string(return_code));
   }
 
   return std::string(rtsp_url.get());

@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y build-essential cmake curl libboost-all
 
 ADD . /app
 
-ENV IVS_SDK_PATH=/app/IVS_SDK
+ENV IVS_SDK_PATH=/app/external/eSDK_IVS_API
 
 RUN mkdir /app/build && cd /app/build && cmake .. && cmake --build /app/build --target all --config Release -- -j 10
 

@@ -9,7 +9,7 @@ namespace api = vms::api;
 std::shared_ptr<vms::VMSInterface> api::Session::login(
     const std::string &ip, const std::string &username,
     const std::string &password, const std::string &vendor) {
-  auto session = _get_session(ip);
+  auto session = _get_session(ip, username, password);
 
   if (session) {
     if (_match(ip, username, password)) {
@@ -23,8 +23,7 @@ std::shared_ptr<vms::VMSInterface> api::Session::login(
       vms->login(ip, 9900, username, password);
 
       std::unique_lock<std::mutex> lock{_mutex};
-      _sessions.insert({ip, vms});
-      _auths.insert({ip, {username, password}});
+      _add_session(ip, username, password, vms);
 
       return vms;
     } catch (std::runtime_error) {
@@ -44,8 +43,9 @@ std::shared_ptr<vms::VMSInterface> api::Session::_create_vendor_vms(
   return vms;
 }
 
-void api::Session::logout(const std::string &ip) {
-  auto session = _get_session(ip);
+void api::Session::logout(const std::string &ip, const std::string &username,
+                          const std::string &password) {
+  auto session = _get_session(ip, username, password);
 
   if (session) {
     try {
@@ -60,7 +60,8 @@ void api::Session::logout(const std::string &ip) {
 
 bool api::Session::_match(const std::string &ip, const std::string &username,
                           const std::string &password) {
-  auto auth = _auths.find(ip);
+  auto key = _session_key(ip, username, password);
+  auto auth = _auths.find(key);
 
   if (auth != _auths.end()) {
     if (auth->second.username == username &&
@@ -72,10 +73,29 @@ bool api::Session::_match(const std::string &ip, const std::string &username,
   return false;
 }
 
+std::string api::Session::_session_key(const std::string &ip,
+                                       const std::string &username,
+                                       const std::string &password) {
+  return username + std::string(":") + password + std::string("@") + ip;
+}
+
+void api::Session::_add_session(const std::string &ip,
+                                const std::string &username,
+                                const std::string &password,
+                                std::shared_ptr<vms::VMSInterface> vms) {
+  auto key = _session_key(ip, username, password);
+  _sessions.insert({key, vms});
+  _auths.insert({key, {username, password}});
+}
+
 std::shared_ptr<vms::VMSInterface> api::Session::_get_session(
-    const std::string &ip) {
+    const std::string &ip,
+    const std::string &username,
+    const std::string &password) {
   std::unique_lock<std::mutex> lock{_mutex};
-  auto session = _sessions.find(ip);
+
+  auto key = _session_key(ip, username, password);
+  auto session = _sessions.find(key);
 
   if (session == _sessions.end()) {
     return nullptr;

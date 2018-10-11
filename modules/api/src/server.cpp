@@ -4,7 +4,8 @@
 namespace api = vms::api;
 
 auto console = spdlog::stdout_color_mt("server");
-// api::Session session;
+
+api::Session api::Server::_session;
 
 api::Server::Server() {
   CROW_ROUTE(_app, "/camera-list").methods("POST"_method)(_camera_list);
@@ -20,7 +21,7 @@ api::Server::Server() {
 
 void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
 
-std::shared_ptr<vms::hwivs::HuaweiIVS> api::Server::_login(
+std::shared_ptr<vms::VMSInterface> api::Server::_login(
     const crow::json::rvalue body) {
   const std::string ip = body["ip"].s();
   const std::string username = body["username"].s();
@@ -28,10 +29,7 @@ std::shared_ptr<vms::hwivs::HuaweiIVS> api::Server::_login(
   const std::string vendor = body["vendor"].s();
 
   try {
-    auto vms = std::make_shared<vms::hwivs::HuaweiIVS>("./log");
-    vms->login(ip, 9900, username, password);
-    return vms;
-    // return session.login(ip, username, password, vendor);
+    return _session.login(ip, username, password, vendor);
   } catch (std::exception) {
     throw;
   }

@@ -23,13 +23,25 @@ class Session {
                                            const std::string &password,
                                            const std::string &vendor);
 
-  void logout(const std::string &ip);
+  void logout(const std::string &ip, const std::string &username,
+              const std::string &password);
 
  private:
   std::shared_ptr<vms::VMSInterface> _create_vendor_vms(
       const std::string &vendor);
 
-  std::shared_ptr<vms::VMSInterface> _get_session(const std::string &ip);
+  std::string _session_key(const std::string &ip,
+                           const std::string &username,
+                           const std::string &password);
+
+  void _add_session(const std::string &ip,
+                    const std::string &username,
+                    const std::string &password,
+                    std::shared_ptr<vms::VMSInterface>);
+
+  std::shared_ptr<vms::VMSInterface> _get_session(const std::string &ip,
+                                                  const std::string &username,
+                                                  const std::string &password);
 
   bool _match(const std::string &ip, const std::string &username,
               const std::string &password);

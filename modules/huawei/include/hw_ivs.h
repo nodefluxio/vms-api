@@ -43,7 +43,7 @@ class HuaweiIVS : public VMSInterface {
   int _session_id;
   bool _logged_in;
 
-  std::shared_ptr<spdlog::logger> _logger;
+  static std::shared_ptr<spdlog::logger> _logger;
 
   static int _ref_count;
 };

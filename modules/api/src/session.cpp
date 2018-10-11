@@ -51,10 +51,7 @@ void Session::logout(const std::string &ip, const std::string &username,
       _delete_session(ip, username, password);
     } catch (std::runtime_error &) {
       _delete_session(ip, username, password);
-      throw;
     }
-  } else {
-    throw std::invalid_argument("IP address does not exists in the session.");
   }
 }
 

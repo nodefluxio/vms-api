@@ -28,6 +28,8 @@ class Server {
 
   static void _health_check(const crow::request &req, crow::response &res);
 
+  static void _logout_on_user_error(int code, const crow::json::rvalue &body);
+
   crow::SimpleApp _app;
   static std::shared_ptr<spdlog::logger> _logger;
   static api::Session _session;

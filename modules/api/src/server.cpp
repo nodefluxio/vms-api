@@ -1,3 +1,4 @@
+#include <vms_exception.h>
 #include "server.h"
 #include "spdlog/spdlog.h"
 
@@ -35,6 +36,16 @@ std::shared_ptr<vms::VMSInterface> Server::_login(
   }
 }
 
+void Server::_logout_on_user_error(int code, const crow::json::rvalue &body) {
+  if (code == 109100000 || code == 109100001 || code == 999115312) {
+    const std::string ip = body["ip"].s();
+    const std::string username = body["username"].s();
+    const std::string password = body["password"].s();
+
+    _session.logout(ip, username, password);
+  }
+}
+
 void Server::_camera_list(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = false;
@@ -58,11 +69,13 @@ void Server::_camera_list(const crow::request &req, crow::response &res) {
     response["code"] = "camera/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error &err) {
+  } catch (vms::VMSException &err) {
     _logger->error(err.what());
     response["code"] = "camera/failed";
-    response["message"] = "Failed to find camera.";
+    response["message"] = err.what();
     res.code = 400;
+
+    _logout_on_user_error(err.code(), crow::json::load(req.body));
   }
 
   res.add_header("Content-Type", "application/json");
@@ -95,11 +108,13 @@ void Server::_recording_list(const crow::request &req,
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error &err) {
+  } catch (vms::VMSException &err) {
     _logger->error(err.what());
     response["code"] = "recording/failed";
-    response["message"] = "Failed to find recording.";
+    response["message"] = err.what();
     res.code = 400;
+
+    _logout_on_user_error(err.code(), crow::json::load(req.body));
   }
 
   res.add_header("Content-Type", "application/json");
@@ -124,14 +139,16 @@ void Server::_playback(const crow::request &req, crow::response &res) {
     response["url"] = rtsp_url;
   } catch (std::invalid_argument &err) {
     _logger->error(err.what());
-    response["code"] = "recording/invalid-argument";
+    response["code"] = "playback/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error &err) {
+  } catch (vms::VMSException &err) {
     _logger->error(err.what());
-    response["code"] = "recording/failed";
-    response["message"] = "Failed to find recording.";
+    response["code"] = "playback/failed";
+    response["message"] = err.what();
     res.code = 400;
+
+    _logout_on_user_error(err.code(), crow::json::load(req.body));
   }
 
   res.add_header("Content-Type", "application/json");
@@ -163,11 +180,13 @@ void Server::_live_stream(const crow::request &req, crow::response &res) {
     response["code"] = "live-stream/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error &err) {
+  } catch (vms::VMSException &err) {
     _logger->error(err.what());
     response["code"] = "live-stream/failed";
-    response["message"] = "Failed to find live stream.";
+    response["message"] = err.what();
     res.code = 400;
+
+    _logout_on_user_error(err.code(), crow::json::load(req.body));
   }
 
   res.add_header("Content-Type", "application/json");

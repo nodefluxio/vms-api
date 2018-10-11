@@ -1,23 +1,24 @@
 #include <cstring>
 #include <memory>
-#include <stdexcept>
 #include <vector>
 
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
+#include "hw_errors.h"
+#include "vms_exception.h"
 
 namespace vms {
 namespace hwivs {
 
 int HuaweiIVS::_ref_count = 0;
 
+std::shared_ptr<spdlog::logger> HuaweiIVS::_logger = spdlog::stdout_color_mt("huawei");
+
 HuaweiIVS::HuaweiIVS(const std::string &log_path) {
   if (HuaweiIVS::_ref_count <= 0) {
     IVS_SDK_SetLogPath(log_path.c_str());
     IVS_SDK_Init();
   }
-
-  _logger = spdlog::stdout_color_mt("huawei");
 
   HuaweiIVS::_ref_count++;
 }
@@ -53,8 +54,7 @@ void HuaweiIVS::login(const std::string &ip, unsigned int port,
   int return_code = IVS_SDK_Login(&login_info, &_session_id);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error("Login failed. Error code: " +
-        std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   _logged_in = true;
@@ -87,8 +87,7 @@ std::vector<vms::Device> HuaweiIVS::nvr_list(unsigned int max) {
       IVS_SDK_GetNVRList(_session_id, "", 1, &range, nvr_list_ptr, buffer_size);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error("Failed to list nvr. Error code: " +
-        std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   std::vector<vms::Device> nvrs;
@@ -118,8 +117,7 @@ std::vector<vms::Device> HuaweiIVS::camera_list(unsigned int max) {
                             camera_list_ptr, buffer_size);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error("Failed to list camera. Error code: " +
-        std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   std::vector<vms::Device> cameras;
@@ -167,8 +165,7 @@ std::vector<vms::Record> HuaweiIVS::recording_list(
                             &index_range, recording_list_ptr, buffer_size);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error("Failed to list recording. Error code: " +
-        std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   unsigned int num_of_records = _get_num_of_records(recording_list_ptr);
@@ -224,9 +221,7 @@ std::string HuaweiIVS::playback(const std::string &camera_code,
                                        rtsp_url_ptr, 1024);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error(
-        "Failed to get RTSP URL for live streaming . Error code: " +
-            std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   return std::string(rtsp_url.get());
@@ -241,8 +236,7 @@ std::vector<IVS_STREAM_INFO> get_stream_info(int session_id,
       sizeof(stream_config));
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error("Failed to get stream info. Error code: " +
-        std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   std::vector<IVS_STREAM_INFO> stream_info;
@@ -277,9 +271,7 @@ std::string HuaweiIVS::live_stream(const std::string &camera_code,
                                        rtsp_url_ptr, 1024);
 
   if (return_code != IVS_SUCCEED) {
-    throw std::runtime_error(
-        "Failed to get RTSP URL for live streaming . Error code: " +
-            std::to_string(return_code));
+    throw vms::VMSException(return_code, error_message(return_code).c_str());
   }
 
   return std::string(rtsp_url.get());

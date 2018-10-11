@@ -4,9 +4,10 @@
 #include "hw_ivs.h"
 #include "session.h"
 
-namespace api = vms::api;
+namespace vms {
+namespace api {
 
-std::shared_ptr<vms::VMSInterface> api::Session::login(
+std::shared_ptr<vms::VMSInterface> Session::login(
     const std::string &ip, const std::string &username,
     const std::string &password, const std::string &vendor) {
   auto session = _get_session(ip, username, password);
@@ -26,13 +27,13 @@ std::shared_ptr<vms::VMSInterface> api::Session::login(
       _add_session(ip, username, password, vms);
 
       return vms;
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
       throw;
     }
   }
 }
 
-std::shared_ptr<vms::VMSInterface> api::Session::_create_vendor_vms(
+std::shared_ptr<vms::VMSInterface> Session::_create_vendor_vms(
     const std::string &vendor) {
   std::shared_ptr<vms::VMSInterface> vms{nullptr};
 
@@ -43,14 +44,14 @@ std::shared_ptr<vms::VMSInterface> api::Session::_create_vendor_vms(
   return vms;
 }
 
-void api::Session::logout(const std::string &ip, const std::string &username,
+void Session::logout(const std::string &ip, const std::string &username,
                           const std::string &password) {
   auto session = _get_session(ip, username, password);
 
   if (session) {
     try {
       session->logout();
-    } catch (std::runtime_error) {
+    } catch (std::runtime_error &) {
       throw;
     }
   } else {
@@ -58,7 +59,7 @@ void api::Session::logout(const std::string &ip, const std::string &username,
   }
 }
 
-bool api::Session::_match(const std::string &ip, const std::string &username,
+bool Session::_match(const std::string &ip, const std::string &username,
                           const std::string &password) {
   auto key = _session_key(ip, username, password);
   auto auth = _auths.find(key);
@@ -73,13 +74,13 @@ bool api::Session::_match(const std::string &ip, const std::string &username,
   return false;
 }
 
-std::string api::Session::_session_key(const std::string &ip,
+std::string Session::_session_key(const std::string &ip,
                                        const std::string &username,
                                        const std::string &password) {
   return username + std::string(":") + password + std::string("@") + ip;
 }
 
-void api::Session::_add_session(const std::string &ip,
+void Session::_add_session(const std::string &ip,
                                 const std::string &username,
                                 const std::string &password,
                                 std::shared_ptr<vms::VMSInterface> vms) {
@@ -88,7 +89,7 @@ void api::Session::_add_session(const std::string &ip,
   _auths.insert({key, {username, password}});
 }
 
-std::shared_ptr<vms::VMSInterface> api::Session::_get_session(
+std::shared_ptr<vms::VMSInterface> Session::_get_session(
     const std::string &ip,
     const std::string &username,
     const std::string &password) {
@@ -102,4 +103,7 @@ std::shared_ptr<vms::VMSInterface> api::Session::_get_session(
   }
 
   return session->second;
+}
+
+}
 }

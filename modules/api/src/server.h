@@ -16,7 +16,7 @@ class Server {
 
  private:
   static std::shared_ptr<vms::VMSInterface> _login(
-      const crow::json::rvalue body);
+      const crow::json::rvalue &body);
 
   static void _camera_list(const crow::request &req, crow::response &res);
 
@@ -29,6 +29,7 @@ class Server {
   static void _health_check(const crow::request &req, crow::response &res);
 
   crow::SimpleApp _app;
+  static std::shared_ptr<spdlog::logger> _logger;
   static api::Session _session;
 };
 

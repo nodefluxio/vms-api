@@ -1,13 +1,13 @@
 #include "server.h"
 #include "spdlog/spdlog.h"
 
-namespace api = vms::api;
+namespace vms {
+namespace api {
 
-auto console = spdlog::stdout_color_mt("server");
+Session Server::_session;
+std::shared_ptr<spdlog::logger> Server::_logger = spdlog::stdout_color_mt("server");
 
-api::Session api::Server::_session;
-
-api::Server::Server() {
+Server::Server() {
   CROW_ROUTE(_app, "/camera-list").methods("POST"_method)(_camera_list);
 
   CROW_ROUTE(_app, "/recording-list").methods("POST"_method)(_recording_list);
@@ -19,10 +19,10 @@ api::Server::Server() {
   CROW_ROUTE(_app, "/health-check").methods("GET"_method)(_health_check);
 }
 
-void api::Server::run(int port) { _app.port(port).multithreaded().run(); }
+void Server::run(int port) { _app.port(port).multithreaded().run(); }
 
-std::shared_ptr<vms::VMSInterface> api::Server::_login(
-    const crow::json::rvalue body) {
+std::shared_ptr<vms::VMSInterface> Server::_login(
+    const crow::json::rvalue &body) {
   const std::string ip = body["ip"].s();
   const std::string username = body["username"].s();
   const std::string password = body["password"].s();
@@ -30,12 +30,12 @@ std::shared_ptr<vms::VMSInterface> api::Server::_login(
 
   try {
     return _session.login(ip, username, password, vendor);
-  } catch (std::exception) {
+  } catch (std::exception &) {
     throw;
   }
 }
 
-void api::Server::_camera_list(const crow::request &req, crow::response &res) {
+void Server::_camera_list(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = false;
 
@@ -53,13 +53,13 @@ void api::Server::_camera_list(const crow::request &req, crow::response &res) {
       response["camera"][i]["code"] = cameras.at(i).code();
     }
 
-  } catch (std::invalid_argument err) {
-    console->error(err.what());
+  } catch (std::invalid_argument &err) {
+    _logger->error(err.what());
     response["code"] = "camera/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error err) {
-    console->error(err.what());
+  } catch (std::runtime_error &err) {
+    _logger->error(err.what());
     response["code"] = "camera/failed";
     response["message"] = "Failed to find camera.";
     res.code = 400;
@@ -70,8 +70,8 @@ void api::Server::_camera_list(const crow::request &req, crow::response &res) {
   res.end();
 }
 
-void api::Server::_recording_list(const crow::request &req,
-                                  crow::response &res) {
+void Server::_recording_list(const crow::request &req,
+                             crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = false;
 
@@ -90,13 +90,13 @@ void api::Server::_recording_list(const crow::request &req,
       response["records"][i]["start_time"] = records.at(i).start_time;
       response["records"][i]["end_time"] = records.at(i).end_time;
     }
-  } catch (std::invalid_argument err) {
-    console->error(err.what());
+  } catch (std::invalid_argument &err) {
+    _logger->error(err.what());
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error err) {
-    console->error(err.what());
+  } catch (std::runtime_error &err) {
+    _logger->error(err.what());
     response["code"] = "recording/failed";
     response["message"] = "Failed to find recording.";
     res.code = 400;
@@ -107,7 +107,7 @@ void api::Server::_recording_list(const crow::request &req,
   res.end();
 }
 
-void api::Server::_playback(const crow::request &req, crow::response &res) {
+void Server::_playback(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = false;
 
@@ -122,13 +122,13 @@ void api::Server::_playback(const crow::request &req, crow::response &res) {
     response["ok"] = true;
     response["code"] = "recording/success";
     response["url"] = rtsp_url;
-  } catch (std::invalid_argument err) {
-    console->error(err.what());
+  } catch (std::invalid_argument &err) {
+    _logger->error(err.what());
     response["code"] = "recording/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error err) {
-    console->error(err.what());
+  } catch (std::runtime_error &err) {
+    _logger->error(err.what());
     response["code"] = "recording/failed";
     response["message"] = "Failed to find recording.";
     res.code = 400;
@@ -139,7 +139,7 @@ void api::Server::_playback(const crow::request &req, crow::response &res) {
   res.end();
 }
 
-void api::Server::_live_stream(const crow::request &req, crow::response &res) {
+void Server::_live_stream(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = false;
 
@@ -158,13 +158,13 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
     response["ok"] = true;
     response["code"] = "live-stream/success";
     response["url"] = rtsp_url;
-  } catch (std::invalid_argument err) {
-    console->error(err.what());
+  } catch (std::invalid_argument &err) {
+    _logger->error(err.what());
     response["code"] = "live-stream/invalid-argument";
     response["message"] = "Argument is invalid.";
     res.code = 400;
-  } catch (std::runtime_error err) {
-    console->error(err.what());
+  } catch (std::runtime_error &err) {
+    _logger->error(err.what());
     response["code"] = "live-stream/failed";
     response["message"] = "Failed to find live stream.";
     res.code = 400;
@@ -175,11 +175,14 @@ void api::Server::_live_stream(const crow::request &req, crow::response &res) {
   res.end();
 }
 
-void api::Server::_health_check(const crow::request &req, crow::response &res) {
+void Server::_health_check(const crow::request &req, crow::response &res) {
   crow::json::wvalue response;
   response["ok"] = true;
 
   res.add_header("Content-Type", "application/json");
   res.write(crow::json::dump(response));
   res.end();
+}
+
+}
 }

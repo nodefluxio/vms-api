@@ -1,15 +1,18 @@
 #ifndef HW_IVS_H
 #define HW_IVS_H
 
+#include "spdlog/spdlog.h"
+
 #include "vms_interface.h"
 
 namespace vms {
 namespace hwivs {
+
 class HuaweiIVS : public VMSInterface {
  public:
-  HuaweiIVS(const std::string &log_path);
+  explicit HuaweiIVS(const std::string &log_path);
 
-  ~HuaweiIVS();
+  ~HuaweiIVS() override;
 
   void login(const std::string &ip, unsigned int port,
              const std::string &username, const std::string &password) override;
@@ -39,8 +42,12 @@ class HuaweiIVS : public VMSInterface {
  private:
   int _session_id;
   bool _logged_in;
-  static bool _initialized;
+
+  std::shared_ptr<spdlog::logger> _logger;
+
+  static int _ref_count;
 };
+
 }  // namespace hwivs
 }  // namespace vms
 

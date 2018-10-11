@@ -5,39 +5,40 @@
 
 #include "IVS_SDK.h"
 #include "hw_ivs.h"
-#include "spdlog/spdlog.h"
 
-namespace hwivs = vms::hwivs;
+namespace vms {
+namespace hwivs {
 
-auto hw_console = spdlog::stdout_color_mt("huawei");
+int HuaweiIVS::_ref_count = 0;
 
-bool hwivs::HuaweiIVS::_initialized = false;
-
-hwivs::HuaweiIVS::HuaweiIVS(const std::string &log_path) {
-  if (!hwivs::HuaweiIVS::_initialized) {
+HuaweiIVS::HuaweiIVS(const std::string &log_path) {
+  if (HuaweiIVS::_ref_count <= 0) {
     IVS_SDK_SetLogPath(log_path.c_str());
     IVS_SDK_Init();
-
-    hwivs::HuaweiIVS::_initialized = true;
   }
+
+  _logger = spdlog::stdout_color_mt("huawei");
+
+  HuaweiIVS::_ref_count++;
 }
 
-hwivs::HuaweiIVS::~HuaweiIVS() {
+HuaweiIVS::~HuaweiIVS() {
   if (_logged_in) {
     logout();
   }
 
-  if (hwivs::HuaweiIVS::_initialized) {
-    IVS_SDK_Cleanup();
+  HuaweiIVS::_ref_count--;
 
-    hwivs::HuaweiIVS::_initialized = false;
+  if (HuaweiIVS::_ref_count <= 0) {
+    IVS_SDK_Cleanup();
   }
 };
 
-void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,
-                             const std::string &username,
-                             const std::string &password) {
-  hw_console->info("Logging in to Huawei VMS...");
+void HuaweiIVS::login(const std::string &ip, unsigned int port,
+                      const std::string &username,
+                      const std::string &password) {
+  _logger->info("Logging in to Huawei VMS...");
+
   IVS_LOGIN_INFO login_info;
   strncpy(login_info.cUserName, username.c_str(), IVS_IP_LEN);
   strncpy(login_info.pPWD, password.c_str(), IVS_PWD_LEN);
@@ -59,21 +60,22 @@ void hwivs::HuaweiIVS::login(const std::string &ip, unsigned int port,
   _logged_in = true;
 }
 
-void hwivs::HuaweiIVS::logout() {
-  hw_console->info("Logging out from Huawei VMS...");
+void HuaweiIVS::logout() {
+  _logger->info("Logging out from Huawei VMS...");
+
   int return_code = IVS_SDK_Logout(_session_id);
 
   if (return_code != IVS_SUCCEED) {
-    hw_console->error("Logout failed. Error code: " +
+    _logger->error("Logout failed. Error code: " +
         std::to_string(return_code));
   }
 
   _logged_in = false;
 }
 
-int hwivs::HuaweiIVS::session_id() { return _session_id; }
+int HuaweiIVS::session_id() { return _session_id; }
 
-std::vector<vms::Device> hwivs::HuaweiIVS::nvr_list(unsigned int max) {
+std::vector<vms::Device> HuaweiIVS::nvr_list(unsigned int max) {
   IVS_INDEX_RANGE range = {1, max};
   unsigned int buffer_size = sizeof(IVS_DEVICE_BRIEF_INFO_LIST) +
       (max - 1) * sizeof(IVS_DEVICE_BRIEF_INFO);
@@ -103,7 +105,7 @@ std::vector<vms::Device> hwivs::HuaweiIVS::nvr_list(unsigned int max) {
   return nvrs;
 }
 
-std::vector<vms::Device> hwivs::HuaweiIVS::camera_list(unsigned int max) {
+std::vector<vms::Device> HuaweiIVS::camera_list(unsigned int max) {
   IVS_INDEX_RANGE index_range = {1, max};
   unsigned int buffer_size = sizeof(IVS_CAMERA_BRIEF_INFO_LIST) +
       (max - 1) * sizeof(IVS_CAMERA_BRIEF_INFO);
@@ -136,7 +138,7 @@ std::vector<vms::Device> hwivs::HuaweiIVS::camera_list(unsigned int max) {
 
 unsigned int _get_num_of_records(IVS_RECORD_INFO_LIST *recording_list_ptr) {
   unsigned int num_of_records = (recording_list_ptr->stIndexRange.uiToIndex -
-      recording_list_ptr->stIndexRange.uiToIndex) +
+      recording_list_ptr->stIndexRange.uiFromIndex) +
       1;
 
   if (num_of_records > recording_list_ptr->uiTotal) {
@@ -146,7 +148,7 @@ unsigned int _get_num_of_records(IVS_RECORD_INFO_LIST *recording_list_ptr) {
   return num_of_records;
 }
 
-std::vector<vms::Record> hwivs::HuaweiIVS::recording_list(
+std::vector<vms::Record> HuaweiIVS::recording_list(
     const std::string &camera_code, const std::string &start_time,
     const std::string &end_time, unsigned int max) {
   IVS_TIME_SPAN time_span = {0};
@@ -208,10 +210,10 @@ IVS_URL_MEDIA_PARAM create_url_media_param(IVS_SERVICE_TYPE service_type,
   return param;
 }
 
-std::string hwivs::HuaweiIVS::playback(const std::string &camera_code,
-                                       const std::string &nvr_code,
-                                       const std::string &start_time,
-                                       const std::string &end_time) {
+std::string HuaweiIVS::playback(const std::string &camera_code,
+                                const std::string &nvr_code,
+                                const std::string &start_time,
+                                const std::string &end_time) {
   auto param = create_url_media_param(SERVICE_TYPE_PLAYBACK, nvr_code,
                                       start_time, end_time);
 
@@ -251,9 +253,9 @@ std::vector<IVS_STREAM_INFO> get_stream_info(int session_id,
   return stream_info;
 }
 
-std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
-                                          const std::string &nvr_code,
-                                          const std::string &transport) {
+std::string HuaweiIVS::live_stream(const std::string &camera_code,
+                                   const std::string &nvr_code,
+                                   const std::string &transport) {
   auto stream_info = get_stream_info(_session_id, camera_code);
   auto param = create_url_media_param(SERVICE_TYPE_REALVIDEO, nvr_code);
 
@@ -281,4 +283,7 @@ std::string hwivs::HuaweiIVS::live_stream(const std::string &camera_code,
   }
 
   return std::string(rtsp_url.get());
+}
+
+}
 }

@@ -13,24 +13,21 @@ std::shared_ptr<vms::VMSInterface> Session::login(
   auto session = _get_session(ip, username, password);
 
   if (session) {
-    if (_match(ip, username, password)) {
-      return session;
-    } else {
-      throw std::invalid_argument("Username and password does not match.");
-    }
-  } else {
-    try {
-      std::shared_ptr<vms::VMSInterface> vms = _create_vendor_vms(vendor);
-      vms->login(ip, 9900, username, password);
-
-      std::unique_lock<std::mutex> lock{_mutex};
-      _add_session(ip, username, password, vms);
-
-      return vms;
-    } catch (std::runtime_error &) {
-      throw;
-    }
+    return session;
   }
+
+  try {
+    std::shared_ptr<vms::VMSInterface> vms = _create_vendor_vms(vendor);
+    vms->login(ip, 9900, username, password);
+
+    std::unique_lock<std::mutex> lock{_mutex};
+    _add_session(ip, username, password, vms);
+
+    return vms;
+  } catch (std::runtime_error &) {
+    throw;
+  }
+
 }
 
 std::shared_ptr<vms::VMSInterface> Session::_create_vendor_vms(
@@ -45,13 +42,15 @@ std::shared_ptr<vms::VMSInterface> Session::_create_vendor_vms(
 }
 
 void Session::logout(const std::string &ip, const std::string &username,
-                          const std::string &password) {
+                     const std::string &password) {
   auto session = _get_session(ip, username, password);
 
   if (session) {
     try {
       session->logout();
+      _delete_session(ip, username, password);
     } catch (std::runtime_error &) {
+      _delete_session(ip, username, password);
       throw;
     }
   } else {
@@ -59,34 +58,18 @@ void Session::logout(const std::string &ip, const std::string &username,
   }
 }
 
-bool Session::_match(const std::string &ip, const std::string &username,
-                          const std::string &password) {
-  auto key = _session_key(ip, username, password);
-  auto auth = _auths.find(key);
-
-  if (auth != _auths.end()) {
-    if (auth->second.username == username &&
-        auth->second.password == password) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 std::string Session::_session_key(const std::string &ip,
-                                       const std::string &username,
-                                       const std::string &password) {
+                                  const std::string &username,
+                                  const std::string &password) {
   return username + std::string(":") + password + std::string("@") + ip;
 }
 
 void Session::_add_session(const std::string &ip,
-                                const std::string &username,
-                                const std::string &password,
-                                std::shared_ptr<vms::VMSInterface> vms) {
+                           const std::string &username,
+                           const std::string &password,
+                           std::shared_ptr<vms::VMSInterface> vms) {
   auto key = _session_key(ip, username, password);
   _sessions.insert({key, vms});
-  _auths.insert({key, {username, password}});
 }
 
 std::shared_ptr<vms::VMSInterface> Session::_get_session(
@@ -103,6 +86,14 @@ std::shared_ptr<vms::VMSInterface> Session::_get_session(
   }
 
   return session->second;
+}
+
+void Session::_delete_session(const std::string &ip,
+                              const std::string &username,
+                              const std::string &password) {
+  auto key = _session_key(ip, username, password);
+
+  _sessions.erase(key);
 }
 
 }

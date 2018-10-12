@@ -15,12 +15,16 @@ std::string error_message(int code) {
       return "Failed to connect to the network. (Connection timeout due to an offline server or a network problem.)";
     case 109100020:
       return "The number of connections exceeds the maximum limit.";
+    case 109100055:
+      return "Invalid URL.";
     case 119108128:
       return "The NVR is offline.";
     case 119101306:
       return "The number of concurrent online users who use the same account exceeded the maximum.";
     case 119101307:
       return "The total number of concurrent online users exceeded the maximum.";
+    case 119132005:
+      return "The device does not exist or license restriction exists.";
     case 999115312:
       return "Invalid SessionID.";
     default:

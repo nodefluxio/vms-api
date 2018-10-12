@@ -36,3 +36,5 @@ build/
 log/
 
 IVS_SDK/
+cmake-build-debug/
+external/eSDK_IVS_API

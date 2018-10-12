@@ -34,3 +34,10 @@ cd build
 cmake ..
 make
 ```
+
+## Changelog
+
+### v0.1.8
+
+- Improve session management
+- Add more informative error message to response and log

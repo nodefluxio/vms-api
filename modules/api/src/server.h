@@ -15,8 +15,8 @@ class Server {
   void run(int port = 8000);
 
  private:
-  static std::shared_ptr<vms::hwivs::HuaweiIVS> _login(
-      const crow::json::rvalue body);
+  static std::shared_ptr<vms::VMSInterface> _login(
+      const crow::json::rvalue &body);
 
   static void _camera_list(const crow::request &req, crow::response &res);
 
@@ -28,7 +28,11 @@ class Server {
 
   static void _health_check(const crow::request &req, crow::response &res);
 
+  static void _logout_on_user_error(int code, const crow::json::rvalue &body);
+
   crow::SimpleApp _app;
+  static std::shared_ptr<spdlog::logger> _logger;
+  static api::Session _session;
 };
 
 }  // namespace api

@@ -35,6 +35,9 @@ cmake ..
 make
 ```
 
+#### VMS Client
+For more detail, please read the [VMS CLient](https://github.com/nodefluxio/vms-api/wiki/VMS-Client).
+
 ## Changelog
 
 ### v0.1.8
